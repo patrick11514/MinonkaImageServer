@@ -1,0 +1,15 @@
+{
+  "name": "image_server",
+  "version": "0.0.1",
+  "description": "Image server for Minonka Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patrik Mintěl",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrick11514/MinonkaImageServer.git"
+  }
+}
