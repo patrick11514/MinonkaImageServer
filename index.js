@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
 
 app.post('/summonerProfile', async (req, res) => {
     let params = req.body
-    if (!params.name || !params.level || !params.icon || !params.region) {
+    if (!params.name || !params.level || !params.region || (!params.icon && params.icon != 0)) {
         return res.send({
             error: 'Missing parameters',
         })
