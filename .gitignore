@@ -1,1 +1,4 @@
 node_modules/
+temp/
+icons_cache/
+assets/resized/
