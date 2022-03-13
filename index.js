@@ -9,6 +9,8 @@ const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
+app.loading = true
+
 const env = require('dotenv')
 env.config({ path: '../.env' })
 
@@ -36,6 +38,16 @@ const g = require('./functions')
 
     //resize icons
     g.prepareResize()
+
+    //clear cache
+    console.log('Removing old files from cache.')
+    fs.readdirSync('./temp').forEach((file) => {
+        console.log(`Removing ${file}`)
+        fs.unlinkSync(`./temp/${file}`)
+    })
+    console.log('Done.')
+
+    app.loading = false
 })()
 
 app.get('/', (req, res) => {
@@ -44,6 +56,14 @@ app.get('/', (req, res) => {
 
 app.post('/summonerProfile', async (req, res) => {
     let params = req.body
+
+    if (app.loading) {
+        return res.send({
+            loading: true,
+            error: 'Still loading.',
+        })
+    }
+
     if (!params.name || !params.level || !params.region || (!params.icon && params.icon != 0)) {
         return res.send({
             error: 'Missing parameters',
