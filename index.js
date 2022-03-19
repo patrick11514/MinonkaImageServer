@@ -55,6 +55,12 @@ app.get('/', (req, res) => {
     res.send(`Riot API v${package.version}`)
 })
 
+app.get('/status', (req, res) => {
+    res.send({
+        status: app.loading,
+    })
+})
+
 app.post('/summonerProfile', async (req, res) => {
     let params = req.body
 
@@ -75,6 +81,25 @@ app.post('/summonerProfile', async (req, res) => {
     res.send({
         file: file,
     })
+})
+
+app.post('/restart', async (req, res) => {
+    let params = req.body
+    console.log(params)
+    console.log(process.env.restartToken)
+    if (params.token != process.env.restartToken) {
+        return res.send({
+            error: 'Invalid token',
+        })
+    }
+    res.send({
+        restarting: true,
+    })
+    console.log('Restarting...')
+    app.loading = true
+    setTimeout(function () {
+        process.exit(0)
+    }, 200)
 })
 
 app.listen(port, () => console.log(`Riot API v${package.version} listening on port ${port}!`))
