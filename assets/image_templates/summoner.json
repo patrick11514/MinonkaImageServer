@@ -963,6 +963,39 @@
                 "x": 700,
                 "y": 244
             }
+        },
+        {
+            "type": "text",
+            "condition": {
+                "type": "multi",
+                "conditions": [
+                    {
+                        "type": "invertedVariable",
+                        "name": "flex"
+                    },
+                    {
+                        "type": "invertedVariable",
+                        "name": "solo"
+                    }
+                ]
+            },
+            "source": {
+                "type": "text",
+                "text": "No ranked data found"
+            },
+            "properties": {
+                "font": "./assets/Roboto-Bold.ttf",
+                "size": 28,
+                "color": "#ff0000",
+                "width": 348,
+                "height": 50,
+                "center": false,
+                "bold": true
+            },
+            "position": {
+                "x": 348,
+                "y": 104
+            }
         }
     ]
 }
