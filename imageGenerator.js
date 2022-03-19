@@ -35,62 +35,38 @@ module.exports = {
 
             if (layer.properties?.color.conditions) {
                 layer.properties.color?.conditions.forEach((condition) => {
+                    let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
+                    let value = variables
+                    ex.forEach((e) => {
+                        value = !value[e] && value[e] != 0 ? null : value[e]
+                    })
+
                     switch (condition.type) {
                         case 'variable': {
-                            let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                            let value = variables
-                            ex.forEach((e) => {
-                                value = !value[e] && value[e] != 0 ? null : value[e]
-                            })
-
                             if (value) {
                                 layer.properties.color = condition.color
                             }
                             break
                         }
                         case 'equals': {
-                            let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                            let value = variables
-                            ex.forEach((e) => {
-                                value = !value[e] && value[e] != 0 ? null : value[e]
-                            })
-
                             if (value == condition.value) {
                                 layer.properties.color = condition.color
                             }
                             break
                         }
                         case 'notEquals': {
-                            let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                            let value = variables
-                            ex.forEach((e) => {
-                                value = !value[e] && value[e] != 0 ? null : value[e]
-                            })
-
                             if (value != condition.value) {
                                 layer.properties.color = condition.color
                             }
                             break
                         }
                         case 'greaterThan': {
-                            let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                            let value = variables
-                            ex.forEach((e) => {
-                                value = !value[e] && value[e] != 0 ? null : value[e]
-                            })
-
                             if (value >= condition.value) {
                                 layer.properties.color = condition.color
                             }
                             break
                         }
                         case 'lowerThan': {
-                            let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                            let value = variables
-                            ex.forEach((e) => {
-                                value = !value[e] && value[e] != 0 ? null : value[e]
-                            })
-
                             if (value < condition.value) {
                                 layer.properties.color = condition.color
                             }
