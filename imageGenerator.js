@@ -8,7 +8,10 @@ module.exports = {
             throw new Error(`Template ${templateName} does not exist`)
         }
 
-        let template = require(`./assets/image_templates/${templateName}.json`)
+        let templateFile = `${process.env.wf}/assets/image_templates/${templateName}.json`
+        delete require.cache[require.resolve(templateFile)]
+
+        let template = require(templateFile)
 
         let buffer = await sharp(template.sourceImage).toBuffer()
 
@@ -37,7 +40,7 @@ module.exports = {
                             let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
                             let value = variables
                             ex.forEach((e) => {
-                                value = value[e] ? value[e] : null
+                                value = !value[e] && value[e] != 0 ? null : value[e]
                             })
 
                             if (value) {
@@ -49,7 +52,7 @@ module.exports = {
                             let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
                             let value = variables
                             ex.forEach((e) => {
-                                value = value[e] ? value[e] : null
+                                value = !value[e] && value[e] != 0 ? null : value[e]
                             })
 
                             if (value == condition.value) {
@@ -61,7 +64,7 @@ module.exports = {
                             let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
                             let value = variables
                             ex.forEach((e) => {
-                                value = value[e] ? value[e] : null
+                                value = !value[e] && value[e] != 0 ? null : value[e]
                             })
 
                             if (value != condition.value) {
@@ -73,7 +76,7 @@ module.exports = {
                             let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
                             let value = variables
                             ex.forEach((e) => {
-                                value = value[e] ? value[e] : null
+                                value = !value[e] && value[e] != 0 ? null : value[e]
                             })
 
                             if (value >= condition.value) {
@@ -85,7 +88,7 @@ module.exports = {
                             let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
                             let value = variables
                             ex.forEach((e) => {
-                                value = value[e] ? value[e] : null
+                                value = !value[e] && value[e] != 0 ? null : value[e]
                             })
 
                             if (value < condition.value) {
@@ -135,7 +138,7 @@ module.exports = {
             let ex = layer.source?.name.includes('.') ? layer.source?.name.split('.') : [layer.source.name]
             let value = variables
             ex.forEach((e) => {
-                value = value[e] ? value[e] : null
+                value = !value[e] && value[e] != 0 ? null : value[e]
             })
             text = value
         } else if (layer.source.type == 'text') {
@@ -174,7 +177,7 @@ module.exports = {
                 let ex = part.name.includes('.') ? part.name.split('.') : [part.name]
                 value = variables
                 for (let e of ex) {
-                    value = value[e] ? value[e] : null
+                    value = !value[e] && value[e] != 0 ? null : value[e]
                 }
             } else if (part.type == 'text') {
                 value = part.text
@@ -211,7 +214,7 @@ module.exports = {
         let ex = variable.includes('.') ? variable.split('.') : [variable]
         let value = variables
         ex.forEach((e) => {
-            value = value[e] ? value[e] : null
+            value = !value[e] && value[e] != 0 ? null : value[e]
         })
 
         if (fs.existsSync(`./assets/resized/${value.toLowerCase()}.png`)) {
