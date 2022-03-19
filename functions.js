@@ -17,44 +17,44 @@ module.exports = {
                 y: 24,
             },
             'unranked.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'iron.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'bronze.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'silver.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'gold.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'platinum.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'diamond.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'master.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'grandmaster.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
             'challenger.png': {
-                x: 102,
-                y: 75,
+                x: 120,
+                y: 88,
             },
         }
 
