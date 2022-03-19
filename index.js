@@ -13,6 +13,7 @@ app.loading = true
 
 const env = require('dotenv')
 env.config({ path: '../.env' })
+process.env.wf = __dirname
 
 const g = require('./functions')
 //fetch Riot Things..
