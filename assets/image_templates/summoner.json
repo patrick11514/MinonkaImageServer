@@ -64,10 +64,10 @@
             ],
             "properties": {
                 "font": "./assets/Roboto-Bold.ttf",
-                "size": 28,
+                "size": 32,
                 "color": "#FFFFFF",
                 "width": 348,
-                "height": 50,
+                "height": 54,
                 "center": false,
                 "bold": true
             },
