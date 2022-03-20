@@ -48,6 +48,31 @@ const g = require('./functions')
     })
     console.log('Done.')
 
+    //download champion images and save them to global scope
+    console.log('Downloading champion images')
+    app.champions = {}
+    let champions = json.data
+    let keys = Object.keys(champions)
+    let count = 0
+    for (let i = 0; i < keys.length; i++) {
+        let champion = champions[keys[i]]
+        let name = champion.id
+        app.champions[champion.key] = name
+        let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
+        let file = `./champions/${name}.png`
+        if (fs.existsSync(file)) {
+            continue
+        }
+        console.log('Downloading ' + name)
+        let request = await fetch(url)
+        if (request.status == 200) {
+            let data = await request.buffer()
+            fs.writeFileSync(file, data)
+            count++
+        }
+    }
+    console.log(`Downloaded ${count} images`)
+
     app.loading = false
 })()
 
@@ -100,6 +125,10 @@ app.post('/restart', async (req, res) => {
     setTimeout(function () {
         process.exit(0)
     }, 200)
+})
+
+app.get('/champions', (req, res) => {
+    res.send(app.champions)
 })
 
 app.listen(port, () => console.log(`Riot API v${package.version} listening on port ${port}!`))
