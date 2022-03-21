@@ -86,6 +86,9 @@ module.exports = {
                 case 'multi':
                     buffer = await this.addMultiText(buffer, layer, variables)
                     break
+                case 'series':
+                    buffer = await this.addSeries(buffer, layer, variables)
+                    break
             }
         }
 
@@ -184,6 +187,36 @@ module.exports = {
             },
             variables
         )
+    },
+
+    addSeries: async function (buffer, layer, variables) {
+        let variable
+        if (layer.source.type == 'variable') {
+            let ex = layer.source?.name.includes('.') ? layer.source?.name.split('.') : [layer.source.name]
+            variable = variables
+            for (let e of ex) {
+                variable = !variable[e] && variable[e] != 0 ? null : variable[e]
+            }
+        }
+
+        if (variable.promos.games) {
+            let baseX = layer.position.x
+            let baseY = layer.position.y
+
+            for (let image of variable.promos.images) {
+                buffer = await sharp(buffer)
+                    .composite([
+                        {
+                            input: './assets/resized/' + image,
+                            top: baseY,
+                            left: baseX,
+                        },
+                    ])
+                    .toBuffer()
+                baseX += 26 + 5
+            }
+        }
+        return buffer
     },
 
     getRankFile: async function (variable, variables) {

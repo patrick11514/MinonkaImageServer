@@ -101,6 +101,21 @@
             }
         },
         {
+            "type": "series",
+            "condition": {
+                "type": "variable",
+                "name": "solo"
+            },
+            "source": {
+                "type": "variable",
+                "name": "solo"
+            },
+            "position": {
+                "x": 480,
+                "y": 104
+            }
+        },
+        {
             "type": "multi",
             "condition": {
                 "type": "variable",
@@ -381,6 +396,30 @@
             },
             "position": {
                 "x": 348,
+                "y": 104
+            }
+        },
+        {
+            "type": "series",
+            "condition": {
+                "type": "multi",
+                "conditions": [
+                    {
+                        "type": "invertedVariable",
+                        "name": "solo"
+                    },
+                    {
+                        "type": "variable",
+                        "name": "flex"
+                    }
+                ]
+            },
+            "source": {
+                "type": "variable",
+                "name": "flex"
+            },
+            "position": {
+                "x": 380,
                 "y": 104
             }
         },
@@ -710,6 +749,21 @@
             },
             "position": {
                 "x": 348,
+                "y": 218
+            }
+        },
+        {
+            "type": "series",
+            "condition": {
+                "type": "variable",
+                "name": "flex"
+            },
+            "source": {
+                "type": "variable",
+                "name": "flex"
+            },
+            "position": {
+                "x": 430,
                 "y": 218
             }
         },
