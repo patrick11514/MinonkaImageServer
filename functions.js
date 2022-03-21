@@ -56,6 +56,18 @@ module.exports = {
                 x: 120,
                 y: 88,
             },
+            'seriesEmpty.png': {
+                x: 26,
+                y: 26,
+            },
+            'seriesWin.png': {
+                x: 26,
+                y: 26,
+            },
+            'seriesLose.png': {
+                x: 26,
+                y: 26,
+            },
         }
 
         for (let file in files) {
