@@ -4,204 +4,25 @@ const fetch = require('node-fetch')
 
 module.exports = {
     generateImage: async function (templateName, variables) {
-        if (!fs.existsSync(`./assets/image_templates/${templateName}.json`)) {
-            throw new Error(`Template ${templateName} does not exist`)
+        if (!fs.existsSync(`./assets/templates/${templateName}.js`)) {
+            return {
+                error: `Template ${templateName} not found`,
+            }
         }
 
-        let templateFile = `${process.env.wf}/assets/image_templates/${templateName}.json`
+        let templateFile = `${process.env.wf}/assets/templates/${templateName}.js`
         delete require.cache[require.resolve(templateFile)]
 
-        let template = require(templateFile)
+        let template = require(`./assets/templates/${templateName}.js`)
 
-        let buffer = await sharp(template.sourceImage).toBuffer()
-
-        for (let layer of template.layers) {
-            if (layer.condition) {
-                if (layer.condition.type == 'variable' && !variables[layer.condition.name]) continue
-                if (layer.condition.type == 'invertedVariable' && variables[layer.condition.name]) continue
-                if (layer.condition.type == 'multi') {
-                    let allTrue = true
-                    for (let condition of layer.condition.conditions) {
-                        if (condition.type == 'variable' && !variables[condition.name]) {
-                            allTrue = false
-                        }
-                        if (condition.type == 'invertedVariable' && variables[condition.name]) {
-                            allTrue = false
-                        }
-                    }
-                    if (!allTrue) continue
-                }
-            }
-
-            if (layer.properties?.color.conditions) {
-                layer.properties.color?.conditions.forEach((condition) => {
-                    let ex = condition.name.includes('.') ? condition.name.split('.') : [condition.name]
-                    let value = variables
-                    ex.forEach((e) => {
-                        value = !value[e] && value[e] != 0 ? null : value[e]
-                    })
-
-                    switch (condition.type) {
-                        case 'variable': {
-                            if (value) {
-                                layer.properties.color = condition.color
-                            }
-                            break
-                        }
-                        case 'equals': {
-                            if (value == condition.value) {
-                                layer.properties.color = condition.color
-                            }
-                            break
-                        }
-                        case 'notEquals': {
-                            if (value != condition.value) {
-                                layer.properties.color = condition.color
-                            }
-                            break
-                        }
-                        case 'greaterThan': {
-                            if (value >= condition.value) {
-                                layer.properties.color = condition.color
-                            }
-                            break
-                        }
-                        case 'lowerThan': {
-                            if (value < condition.value) {
-                                layer.properties.color = condition.color
-                            }
-                            break
-                        }
-                    }
-                })
-            }
-
-            switch (layer.type) {
-                case 'image':
-                    buffer = await this.addImage(buffer, layer, variables)
-                    break
-                case 'text':
-                    buffer = await this.addText(buffer, layer, variables)
-                    break
-                case 'multi':
-                    buffer = await this.addMultiText(buffer, layer, variables)
-                    break
-                case 'series':
-                    buffer = await this.addSeries(buffer, layer, variables)
-                    break
-            }
-        }
-
-        return buffer
-    },
-    addImage: async function (buffer, layer, variables) {
-        return await sharp(buffer)
-            .composite([
-                {
-                    input:
-                        layer.source.type == 'icon'
-                            ? await this.fetchIcon(variables.icon)
-                            : layer.source.type == 'rank'
-                            ? await this.getRankFile(layer.source.tier, variables)
-                            : layer.source.location,
-                    top: layer.position.y,
-                    left: layer.position.x,
-                },
-            ])
-            .toBuffer()
+        template.init(variables)
+        return await template.generate()
     },
 
-    addText: async function (buffer, layer, variables) {
-        let text = ''
-        if (layer.source.type == 'variable') {
-            let ex = layer.source?.name.includes('.') ? layer.source?.name.split('.') : [layer.source.name]
-            let value = variables
-            ex.forEach((e) => {
-                value = !value[e] && value[e] != 0 ? null : value[e]
-            })
-            text = value
-        } else if (layer.source.type == 'text') {
-            text = layer.source.text
-        }
-
-        return await sharp(buffer)
-            .composite([
-                {
-                    input: await this.generateText(
-                        text,
-                        layer.properties.size,
-                        layer.properties.width,
-                        layer.properties.height,
-                        layer.properties.color,
-                        layer.properties.center,
-                        layer.properties.bold
-                    ),
-                    top: layer.position.y,
-                    left: layer.position.x,
-                },
-            ])
-            .toBuffer()
-
-        //let svg = await this.generateText(text, fontSize, width, height, color, center)
-        //return await sharp(buffer)
-        //    .composite([{ input: svg, top: y, left: x }])
-        //    .toBuffer()
-    },
-
-    addMultiText: async function (buffer, layer, variables) {
-        let text = ''
-        for (let part of layer.parts) {
-            let value = ''
-            if (part.type == 'variable') {
-                let ex = part.name.includes('.') ? part.name.split('.') : [part.name]
-                value = variables
-                for (let e of ex) {
-                    value = !value[e] && value[e] != 0 ? null : value[e]
-                }
-            } else if (part.type == 'text') {
-                value = part.text
-            }
-            if (part.lower) {
-                value = value.toLowerCase()
-            }
-            if (part.upper) {
-                value = value.toUpperCase()
-            }
-            if (part.first) {
-                value = value.charAt(0).toUpperCase() + value.slice(1)
-            }
-
-            text += value
-        }
-
-        return await this.addText(
-            buffer,
-            {
-                source: {
-                    type: 'text',
-                    text: text,
-                },
-                position: layer.position,
-                properties: layer.properties,
-                condition: layer?.condition,
-            },
-            variables
-        )
-    },
-
-    addSeries: async function (buffer, layer, variables) {
-        let variable
-        if (layer.source.type == 'variable') {
-            let ex = layer.source?.name.includes('.') ? layer.source?.name.split('.') : [layer.source.name]
-            variable = variables
-            for (let e of ex) {
-                variable = !variable[e] && variable[e] != 0 ? null : variable[e]
-            }
-        }
-
+    addSeries: async function (buffer, variable, x, y) {
         if (variable.promos.games) {
-            let baseX = layer.position.x
-            let baseY = layer.position.y
+            let baseX = x
+            let baseY = y
 
             for (let image of variable.promos.images) {
                 buffer = await sharp(buffer)
@@ -219,19 +40,14 @@ module.exports = {
         return buffer
     },
 
-    getRankFile: async function (variable, variables) {
-        let ex = variable.includes('.') ? variable.split('.') : [variable]
-        let value = variables
-        ex.forEach((e) => {
-            value = !value[e] && value[e] != 0 ? null : value[e]
-        })
-
-        if (fs.existsSync(`./assets/resized/${value.toLowerCase()}.png`)) {
-            return `./assets/resized/${value.toLowerCase()}.png`
+    getRankFile: async function (rank) {
+        if (fs.existsSync(`./assets/resized/${rank.toLowerCase()}.png`)) {
+            return `./assets/resized/${rank.toLowerCase()}.png`
         } else {
             return `./assets/resized/unranked.png`
         }
     },
+
     generateText: async function (text, textSize, width, height, color = '#fff', center = true, bold = true) {
         let centerText = ''
         if (center) {
