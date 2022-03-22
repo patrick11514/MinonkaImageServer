@@ -103,15 +103,17 @@ app.post('/summonerProfile', async (req, res) => {
     }
 
     let file = await g.generateProfile(params)
-    res.send({
-        file: file,
-    })
+    if (file.constructor == [].constructor) {
+        rs.send(file)
+    } else {
+        res.send({
+            file: file,
+        })
+    }
 })
 
 app.post('/restart', async (req, res) => {
     let params = req.body
-    console.log(params)
-    console.log(process.env.restartToken)
     if (params.token != process.env.restartToken) {
         return res.send({
             error: 'Invalid token',
