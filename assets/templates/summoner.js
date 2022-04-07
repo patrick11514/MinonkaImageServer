@@ -24,7 +24,7 @@ module.exports = {
         //summoner name
         buffer = await this.composite(
             buffer,
-            await this.addText(`${this.variables.name} (${this.variables.region})`, 32, 348, '#FFF', false),
+            await this.addText(`${this.variables.name} (${this.variables.region})`, 32, 388, '#FFF', false),
             348,
             54
         )
