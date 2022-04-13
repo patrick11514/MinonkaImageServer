@@ -1,5 +1,6 @@
 const sharp = require('sharp')
 const ig = require('./../../imageGenerator.js')
+const logger = require('./../../logger.js')
 
 String.prototype.firstUpper = function () {
     return this.charAt(0).toUpperCase() + this.slice(1)
@@ -12,16 +13,20 @@ module.exports = {
     },
     generate: async function () {
         //source image
+        logger.log('Loaded source image')
         let buffer = await sharp('./assets/resized/layer.png').toBuffer()
 
         //summoner profile
+        logger.log('Composited summoner icon')
         buffer = await this.composite(buffer, await ig.fetchIcon(this.variables.icon), 28, 52)
 
         //level
+        logger.log('Added summoner level')
         buffer = await this.composite(buffer, './assets/resized/lol_level_layer.png', 149, 328)
         buffer = await this.composite(buffer, await this.addText(this.variables.level, 14, 55, '#FFF'), 149, 337)
 
         //summoner name
+        logger.log('Added summoner name')
         buffer = await this.composite(
             buffer,
             await this.addText(`${this.variables.name} (${this.variables.region})`, 32, 388, '#FFF', false),
@@ -33,14 +38,19 @@ module.exports = {
         let x = 348,
             y = 104
         if (this.variables.solo) {
+            logger.log('Adding solo queue')
             ;[buffer, y] = await this.addRanked(buffer, 'Solo/Duo:', this.variables.solo, x, y)
+            logger.log('Done')
         }
 
         if (this.variables.flex) {
+            logger.log('Adding flex queue')
             ;[buffer, y] = await this.addRanked(buffer, 'Flex:', this.variables.flex, x, y)
+            logger.log('Done')
         }
 
         if (!this.variables.solo && !this.variables.flex) {
+            logger.log('Adding no queue text')
             buffer = await this.composite(
                 buffer,
                 await this.addText('No ranked data found', 28, 348, '#ff0000', false),
@@ -48,6 +58,7 @@ module.exports = {
                 y
             )
         }
+        logger.log('Done')
         return buffer
     },
 
