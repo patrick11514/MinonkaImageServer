@@ -16,18 +16,21 @@ env.config({ path: '../.env' })
 process.env.wf = __dirname
 
 const g = require('./functions')
+
+const logger = require('./logger.js')
+
 //fetch Riot Things..
 ;(async () => {
-    console.log('Fetching current game version')
+    logger.log('Fetching current game version')
     let request = await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)
     let json = await request.json()
     let prevVersion = json[1]
     let currentVersion = json[0]
-    console.log('Checking if files for version is uploaded')
+    logger.log(`Checking if files for version is uploaded`)
     request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
     json = await request.json()
     if (json?.version != currentVersion) {
-        console.log('Falling back to previous version')
+        logger.log('Falling back to previous version')
         currentVersion = prevVersion
 
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
@@ -35,21 +38,21 @@ const g = require('./functions')
     }
     fs.writeFileSync('./champions.json', JSON.stringify(json))
     fs.writeFileSync('./version', currentVersion)
-    console.log('Ok')
+    logger.log('Ok')
 
     //resize icons
     g.prepareResize()
 
     //clear cache
-    console.log('Removing old files from cache.')
+    logger.log('Removing old files from cache.')
     fs.readdirSync('./temp').forEach((file) => {
         console.log(`Removing ${file}`)
         fs.unlinkSync(`./temp/${file}`)
     })
-    console.log('Done.')
+    logger.log('Done.')
 
     //download champion images and save them to global scope
-    console.log('Downloading champion images')
+    logger.log('Downloading champion images')
     app.champions = {}
     let champions = json.data
     let keys = Object.keys(champions)
@@ -63,7 +66,7 @@ const g = require('./functions')
         if (fs.existsSync(file)) {
             continue
         }
-        console.log('Downloading ' + name)
+        logger.log('Downloading ' + name)
         let request = await fetch(url)
         if (request.status == 200) {
             let data = await request.buffer()
@@ -71,7 +74,7 @@ const g = require('./functions')
             count++
         }
     }
-    console.log(`Downloaded ${count} images`)
+    logger.log(`Downloaded ${count} images`)
 
     app.loading = false
 })()
@@ -122,7 +125,7 @@ app.post('/restart', async (req, res) => {
     res.send({
         restarting: true,
     })
-    console.log('Restarting...')
+    logger.log('Restarting...')
     app.loading = true
     setTimeout(function () {
         process.exit(0)
@@ -133,4 +136,4 @@ app.get('/champions', (req, res) => {
     res.send(app.champions)
 })
 
-app.listen(port, () => console.log(`Riot API v${package.version} listening on port ${port}!`))
+app.listen(port, () => logger.log(`Riot API v${package.version} listening on port ${port}!`))
