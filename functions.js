@@ -1,8 +1,8 @@
 const sharp = require('sharp')
 const fs = require('fs')
-const fetch = require('node-fetch')
+const _ = require('lodash')
 const ig = require('./imageGenerator')
-const { resolve } = require('path')
+const logger = require('./logger')
 
 module.exports = {
     //resize icons if not resized
@@ -74,7 +74,7 @@ module.exports = {
             if (!fs.existsSync(`./assets/resized/${file}`)) {
                 let buffer = await sharp(`./assets/${file}`).resize(files[file].x, files[file].y).toBuffer()
                 fs.writeFileSync(`./assets/resized/${file}`, buffer)
-                console.log(`Resized ${file} to ${files[file].x}x${files[file].y}`)
+                logger.log(`Resized ${file} to ${files[file].x}x${files[file].y}`)
             }
         }
     },
@@ -85,11 +85,23 @@ module.exports = {
         let level = params.level
         let icon = params.icon
 
+        if (fs.existsSync(`./temp/${name}@${region}.properties`)) {
+            let data = fs.readFileSync(`./temp/${name}@${region}.properties`)
+            data = JSON.parse(data)
+            if (_.isEqual(data.params, params)) {
+                if (fs.existsSync(data.filename)) {
+                    logger.log(`Using generated image for ${name}@${region} in ${data.filename}`)
+                    return data.filename
+                }
+            }
+        }
+
         let solo = params.solo ? params.solo : null
         let flex = params.flex ? params.flex : null
 
         let temp_name = `./temp/${this.generateRandomString(15)}.png`
 
+        let start = new Date()
         let buffer = await ig.generateImage('summoner', {
             name: name,
             region: region,
@@ -98,9 +110,13 @@ module.exports = {
             solo: solo,
             flex: flex,
         })
+        let diff = new Date() - start
 
+        start = new Date()
         fs.writeFileSync(temp_name, buffer)
-        console.log(`Generated profile for ${name}#${region} to ${temp_name}`)
+        fs.writeFileSync(`./temp/${name}@${region}.properties`, JSON.stringify({ filename: temp_name, params: params }))
+        logger.log(`File written in ${new Date() - start}ms`)
+        logger.log(`Generated profile for ${name}#${region} to ${temp_name} in ${diff}ms`)
 
         return temp_name
     },

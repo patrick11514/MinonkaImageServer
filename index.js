@@ -45,10 +45,12 @@ const logger = require('./logger.js')
 
     //clear cache
     logger.log('Removing old files from cache.')
-    fs.readdirSync('./temp').forEach((file) => {
-        console.log(`Removing ${file}`)
-        fs.unlinkSync(`./temp/${file}`)
-    })
+    fs.readdirSync('./temp')
+        .filter((name) => name.endsWith('.png'))
+        .forEach((file) => {
+            logger.log(`Removing ${file}`)
+            fs.unlinkSync(`./temp/${file}`)
+        })
     logger.log('Done.')
 
     //download champion images and save them to global scope
