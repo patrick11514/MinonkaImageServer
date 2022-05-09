@@ -19,67 +19,92 @@ const g = require('./functions')
 
 const logger = require('./logger.js')
 
-//fetch Riot Things..
-;(async () => {
-    logger.log('Fetching current game version')
-    let request = await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)
-    let json = await request.json()
-    let prevVersion = json[1]
-    let currentVersion = json[0]
-    logger.log(`Checking if files for version is uploaded`)
-    request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
-    json = await request.json()
-    if (json?.version != currentVersion) {
-        logger.log('Falling back to previous version')
-        currentVersion = prevVersion
-
+    //fetch Riot Things..
+    ; (async () => {
+        //check for new version
+        logger.log('Fetching current game version')
+        let request = await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)
+        let json = await request.json()
+        let prevVersion = json[1]
+        let currentVersion = json[0]
+        logger.log(`Checking if files for version is uploaded`)
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
         json = await request.json()
-    }
-    fs.writeFileSync('./champions.json', JSON.stringify(json))
-    fs.writeFileSync('./version', currentVersion)
-    logger.log('Ok')
+        if (json?.version != currentVersion) {
+            logger.log('Falling back to previous version')
+            currentVersion = prevVersion
 
-    //resize icons
-    g.prepareResize()
-
-    //clear cache
-    logger.log('Removing old files from cache.')
-    fs.readdirSync('./temp')
-        .filter((name) => name.endsWith('.png'))
-        .forEach((file) => {
-            logger.log(`Removing ${file}`)
-            fs.unlinkSync(`./temp/${file}`)
-        })
-    logger.log('Done.')
-
-    //download champion images and save them to global scope
-    logger.log('Downloading champion images')
-    app.champions = {}
-    let champions = json.data
-    let keys = Object.keys(champions)
-    let count = 0
-    for (let i = 0; i < keys.length; i++) {
-        let champion = champions[keys[i]]
-        let name = champion.id
-        app.champions[champion.key] = name
-        let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
-        let file = `./champions/${name}.png`
-        if (fs.existsSync(file)) {
-            continue
+            request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
+            json = await request.json()
         }
-        logger.log('Downloading ' + name)
-        let request = await fetch(url)
-        if (request.status == 200) {
-            let data = await request.buffer()
-            fs.writeFileSync(file, data)
-            count++
-        }
-    }
-    logger.log(`Downloaded ${count} images`)
 
-    app.loading = false
-})()
+        fs.writeFileSync('./champions.json', JSON.stringify(json))
+
+        request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/item.json`)
+        json = await request.json()
+        if (json?.version != currentVersion) {
+            logger.log('Falling back to previous version')
+            currentVersion = prevVersion
+
+            request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/item.json`)
+            json = await request.json()
+        }
+
+        fs.writeFileSync('./items.json', JSON.stringify(json))
+
+        fs.writeFileSync('./version', currentVersion)
+        logger.log('Ok')
+
+        //resize icons
+        g.prepareResize()
+
+        //clear cache
+        logger.log('Removing old files from cache.')
+        fs.readdirSync('./temp')
+            .filter((name) => name.endsWith('.png'))
+            .forEach((file) => {
+                logger.log(`Removing ${file}`)
+                fs.unlinkSync(`./temp/${file}`)
+            })
+        logger.log('Done.')
+
+        //download champion images and save them to global scope
+        json = require('./champions.json')
+
+        logger.log('Downloading champion images')
+        app.champions = {}
+        let champions = json.data
+        let keys = Object.keys(champions)
+        let count = 0
+        for (let i = 0; i < keys.length; i++) {
+            let champion = champions[keys[i]]
+            let name = champion.id
+            app.champions[champion.key] = name
+            let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
+            let file = `./champions/${name}.png`
+            if (fs.existsSync(file)) {
+                continue
+            }
+            logger.log('Downloading ' + name)
+            let request = await fetch(url)
+            if (request.status == 200) {
+                let data = await request.buffer()
+                fs.writeFileSync(file, data)
+                count++
+            }
+        }
+        logger.log(`Downloaded ${count} images`)
+
+        //download item images and save them to global scope
+        json = require('./items.json')
+
+        logger.log('Downloading item images')
+        app.items = {}
+        console.log(json.data)
+        logger.log(`Downloaded ${count} images`)
+
+        app.loading = false
+    })()
 
 app.get('/', (req, res) => {
     res.send(`Riot API v${package.version}`)
