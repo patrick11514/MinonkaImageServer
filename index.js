@@ -28,6 +28,8 @@ const logger = require('./logger.js')
         let prevVersion = json[1]
         let currentVersion = json[0]
         logger.log(`Checking if files for version is uploaded`)
+
+        //champions
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion.json`)
         json = await request.json()
         if (json?.version != currentVersion) {
@@ -40,6 +42,7 @@ const logger = require('./logger.js')
 
         fs.writeFileSync('./champions.json', JSON.stringify(json))
 
+        //items
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/item.json`)
         json = await request.json()
         if (json?.version != currentVersion) {
@@ -52,6 +55,7 @@ const logger = require('./logger.js')
 
         fs.writeFileSync('./items.json', JSON.stringify(json))
 
+        //summoner spells
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/summoner.json`)
         json = await request.json()
         if (json?.version != currentVersion) {
@@ -63,6 +67,12 @@ const logger = require('./logger.js')
         }
 
         fs.writeFileSync('./summoner.json', JSON.stringify(json))
+
+        //runes
+        request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/runesReforged.json`)
+        json = await request.json()
+
+        fs.writeFileSync('./runes.json', JSON.stringify(json))
 
         fs.writeFileSync('./version', currentVersion)
         logger.log('Ok')
@@ -111,8 +121,40 @@ const logger = require('./logger.js')
         json = require('./items.json')
 
         logger.log('Downloading item images')
+        let items = json.data
+        keys = Object.keys(items)
+        count = 0
         app.items = {}
-        console.log(json.data)
+
+        for (let i = 0; i < keys.length; i++) {
+            let item = items[keys[i]]
+            if (item.requiredChampion) {
+                continue
+            }
+
+            let id = keys[i]
+            let name = item.name
+                .replaceAll("'", "")
+                .replaceAll(" ", "")
+                .replaceAll(".", "")
+                .replaceAll("-", "")
+
+            app.items[id] = g.formatItem(item, name)
+
+            let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/item/${id}.png`
+            let file = `./items/${name}.png`
+            if (fs.existsSync(file)) {
+                continue
+            }
+            logger.log('Downloading ' + name)
+            let request = await fetch(url)
+            if (request.status == 200) {
+                let data = await request.buffer()
+                fs.writeFileSync(file, data)
+                count++
+            }
+
+        }
         logger.log(`Downloaded ${count} images`)
 
         app.loading = false
