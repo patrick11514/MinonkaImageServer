@@ -52,6 +52,18 @@ const logger = require('./logger.js')
 
         fs.writeFileSync('./items.json', JSON.stringify(json))
 
+        request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/summoner.json`)
+        json = await request.json()
+        if (json?.version != currentVersion) {
+            logger.log('Falling back to previous version')
+            currentVersion = prevVersion
+
+            request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/summoner.json`)
+            json = await request.json()
+        }
+
+        fs.writeFileSync('./summoner.json', JSON.stringify(json))
+
         fs.writeFileSync('./version', currentVersion)
         logger.log('Ok')
 
