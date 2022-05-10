@@ -135,9 +135,10 @@ module.exports = {
      * 
      * @param {Object} item 
      * @param {String} fileName 
+     * @param {Number} id
      * @returns {Object}
      */
-    formatItem: function (item, fileName) {
+    formatItem: function (item, fileName, id) {
         /**
          * @type {String}
          */
@@ -175,6 +176,10 @@ module.exports = {
          * @type {Object}
          */
         let emotes = require("./../assets/emojis.json")
+        /**
+         * @type {String}
+         */
+        let requiredAlly = item.requiredAlly
 
 
         let stats = ["Health", "Base Health Regen", "Mana", "Base Mana Regen", "Armor", "Armor Penetration", "Magic Resist", "Magic Penetration", "Attack Damage", "Ability Power", "Move Speed", "Critical Strike Chance", "Ability Haste", "Attack Speed", "Life Steal"]
@@ -216,6 +221,7 @@ module.exports = {
             "shield",
             "speed",
             "OnHit",
+            "healing",
             "status",
             "trueDamage",
             "truedamage",
@@ -229,7 +235,8 @@ module.exports = {
 
         //replace all tags to italic
         let italicTags = [
-            "rules"
+            "rules",
+            "flavorText"
         ]
 
         for (let i = 0; i < italicTags.length; i++) {
@@ -280,7 +287,19 @@ module.exports = {
             return `*${text}*`
         })
 
-
+        //add additional info for specific items
+        //Seraph's Embrace
+        if (id == 3040) {
+            from = ["3003"]
+        }
+        //Fimbulwinter
+        if (id == 3121) {
+            from = ["3119"]
+        }
+        //Muramana
+        if (id == 3042) {
+            from = ["3004"]
+        }
 
         return {
             name: name,
@@ -291,6 +310,7 @@ module.exports = {
             sell: sell,
             categories: categories,
             depth: depth,
+            requiredAlly: requiredAlly,
             fileName: fileName
         }
     }
