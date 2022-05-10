@@ -155,6 +155,7 @@ const logger = require('./logger.js')
             }
 
         }
+
         logger.log(`Downloaded ${count} images`)
 
         app.loading = false
@@ -215,6 +216,10 @@ app.post('/restart', async (req, res) => {
 
 app.get('/champions', (req, res) => {
     res.send(app.champions)
+})
+
+app.get('/items', (req, res) => {
+    res.send(app.items)
 })
 
 app.listen(port, () => logger.log(`Riot API v${package.version} listening on port ${port}!`))
