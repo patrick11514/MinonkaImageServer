@@ -131,20 +131,50 @@ module.exports = {
         return result
     },
 
+    /**
+     * 
+     * @param {Object} item 
+     * @param {String} fileName 
+     * @returns {Object}
+     */
     formatItem: function (item, fileName) {
+        /**
+         * @type {String}
+         */
         let description = item.description
+        /**
+         * @type {Array}
+         */
         let to = item.into
+        /**
+         * @type {Array}
+         */
         let from = item.from
+        /**
+         * @type {String}
+         */
         let name = item.name
+        /**
+         * @type {String}
+         */
         let price = item.gold.total
+        /**
+         * @type {String}
+         */
         let sell = item.gold.sell
+        /**
+         * @type {Array}
+         */
         let categories = item.tags
 
+        /**
+         * @type {Object}
+         */
         let emotes = require("./../assets/emojis.json")
 
 
-        let stats = ["Health", "Base Health Regen", "Mana", "Base Mana Regen", "Armor", "Armor Penetration", "Magic Resist", "Magic Penetration", "Attack Damage", "Ability Power", "Move Speed", "Critical Strike Chance", "Ability Haste"]
-        let emote = ["health", "healthregen", "mana", "manaregen", "armor", "armorpenetration", "magicresist", "magicpenetration", "attackdamage", "abilitypower", "movementspeed", "criticalchance", "cooldownreduction"]
+        let stats = ["Health", "Base Health Regen", "Mana", "Base Mana Regen", "Armor", "Armor Penetration", "Magic Resist", "Magic Penetration", "Attack Damage", "Ability Power", "Move Speed", "Critical Strike Chance", "Ability Haste", "Attack Speed", "Life Steal"]
+        let emote = ["health", "healthregen", "mana", "manaregen", "armor", "armorpenetration", "magicresist", "magicpenetration", "attackdamage", "abilitypower", "movementspeed", "criticalchance", "cooldownreduction", "attackspeed", "lifesteal"]
 
         let statistics = []
 
@@ -160,17 +190,61 @@ module.exports = {
             .replaceAll("</mainText>", "")
             .replaceAll("<li>", "\n  <:li:973387468332220456> ")
 
+        //replace all tags to bold
+        let boldTags = [
+            "attention",
+            "ornnBonus",
+            "active",
+            "passive",
+            "rarityMythic",
+            "rarityLegendary",
+            "keywordMajor",
+            "keywordStealth",
+            "scaleHealth",
+            "scaleMana",
+            "scaleArmor",
+            "scaleMR",
+            "scaleAP",
+            "scaleAD",
+            "physicalDamage",
+            "magicalDamage",
+            "attackDamage",
+            "shield",
+            "speed",
+            "OnHit",
+            "status",
+            "trueDamage",
+            "truedamage",
+            "scaleLevel",
+        ]
+
+        for (let i = 0; i < boldTags.length; i++) {
+            let tag = boldTags[i]
+            description = description.replaceAll(`${tag}>`, `bold>`)
+        }
+
+        //replace all tags to italic
+        let italicTags = [
+            "rules"
+        ]
+
+        for (let i = 0; i < italicTags.length; i++) {
+            let tag = italicTags[i]
+            description = description.replaceAll(`${tag}>`, `italic>`)
+        }
+
         //replace words with emojis
-        description = description.replace(/<stats>(.*?)<\/stats>/gs, (match, text, offset, string) => {
-            string = string.replace(match, "")
+        let statsText = description.match(/<stats>(.*?)<\/stats>/gs)
+        if (statsText && statsText.length > 0) {
+            statsText = statsText[0]
+        }
 
-            stats.forEach(stat => {
-                string = string.replaceAll(` ${stat} `, ` ${stat} ${statistics[stat]}`)
-            })
-            return match + string + "<<==>>"
+        let string = description.replace(statsText, "")
+
+        stats.forEach(stat => {
+            string = string.replaceAll(stat, `${stat}${statistics[stat]}`)
         })
-
-        description = description.split("<<==>>")[0]
+        description = statsText + string
 
         //stats
         description = description.replace(/<stats>(.*?)<\/stats>/gs, (match, text) => {
@@ -193,52 +267,14 @@ module.exports = {
         })
 
         //bold
-
-        let regexes = [
-            /<attention>(.*?)<\/attention>/gs,
-            /<ornnBonus>(.*?)<\/ornnBonus>/gs,
-            /<active>(.*?)<\/active>/gs,
-            /<passive>(.*?)<\/passive>/gs,
-            /<rarityMythic>(.*?)<\/rarityMythic>/gs,
-            /<rarityLegendary>(.*?)<\/rarityLegendary>/gs,
-            /<keywordMajor>(.*?)<\/keywordMajor>/gs,
-            /<keywordStealth>(.*?)<\/keywordStealth>/gs,
-            /<scaleHealth>(.*?)<\/scaleHealth>/gs,
-            /<scaleMana>(.*?)<\/scaleMana>/gs,
-            /<scaleArmor>(.*?)<\/scaleArmor>/gs,
-            /<scaleMR>(.*?)<\/scaleMR>/gs,
-            /<scaleAP>(.*?)<\/scaleAP>/gs,
-            /<scaleAD>(.*?)<\/scaleAD>/gs,
-            /<physicalDamage>(.*?)<\/physicalDamage>/gs,
-            /<magicalDamage>(.*?)<\/magicalDamage>/gs,
-            /<shield>(.*?)<\/shield>/gs,
-            /<status>(.*?)<\/status>/gs,
-            /<trueDamage>(.*?)<\/trueDamage>/gs,
-            /<truedamage>(.*?)<\/truedamage>/gs,
-            /<scaleLevel>(.*?)<\/scaleLevel>/gs,
-        ]
-
-        let func = function (match, text) {
+        description = description.replace(/<bold>(.*?)<\/bold>/gs, function (match, text) {
             return `**${text}**`
-        }
-
-        for (let regex of regexes) {
-            description = description.replace(regex, func)
-        }
+        })
 
         //italic
-
-        regexes = [
-            /<rules>(.*?)<\/rules>/gs,
-        ]
-
-        func = function (match, text) {
+        description = description.replace(/<italic>(.*?)<\/italic>/gs, function (match, text) {
             return `*${text}*`
-        }
-
-        for (let regex of regexes) {
-            description = description.replace(regex, func)
-        }
+        })
 
         return {
             name: name,
