@@ -1,6 +1,6 @@
 {
   "name": "image_server",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "Image server for Minonka Bot",
   "main": "index.js",
   "scripts": {

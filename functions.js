@@ -166,6 +166,10 @@ module.exports = {
          * @type {Array}
          */
         let categories = item.tags
+        /**
+         * @type {Number}
+         */
+        let depth = item.depth
 
         /**
          * @type {Object}
@@ -276,6 +280,8 @@ module.exports = {
             return `*${text}*`
         })
 
+
+
         return {
             name: name,
             description: description,
@@ -284,6 +290,7 @@ module.exports = {
             price: price,
             sell: sell,
             categories: categories,
+            depth: depth,
             fileName: fileName
         }
     }
