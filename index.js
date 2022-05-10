@@ -139,7 +139,7 @@ const logger = require('./logger.js')
                 .replaceAll(".", "")
                 .replaceAll("-", "")
 
-            app.items[id] = g.formatItem(item, name)
+            app.items[id] = g.formatItem(item, name, id)
 
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/item/${id}.png`
             let file = `./items/${name}.png`
