@@ -130,4 +130,124 @@ module.exports = {
         }
         return result
     },
+
+    formatItem: function (item, fileName) {
+        let description = item.description
+        let to = item.into
+        let from = item.from
+        let name = item.name
+        let price = item.gold.total
+        let sell = item.gold.sell
+
+        let emotes = require("./../assets/emojis.json")
+
+
+        let stats = ["Health", "Base Health Regen", "Mana", "Base Mana Regen", "Armor", "Armor Penetration", "Magic Resist", "Magic Penetration", "Attack Damage", "Ability Power", "Move Speed", "Critical Strike Chance", "Ability Haste"]
+        let emote = ["health", "healthregen", "mana", "manaregen", "armor", "armorpenetration", "magicresist", "magicpenetration", "attackdamage", "abilitypower", "movementspeed", "criticalchance", "cooldownreduction"]
+
+        let statistics = []
+
+        for (let i = 0; i < stats.length; i++) {
+            let em = emotes[emote[i]]
+            statistics[stats[i]] = em
+        }
+
+        //new lines and remove main text and replace li
+        description = description
+            .replaceAll("<br>", "\n")
+            .replaceAll("<mainText>", "")
+            .replaceAll("</mainText>", "")
+            .replaceAll("<li>", "  <:li:973387468332220456> ")
+
+        //replace words with emojis
+        description = description.replace(/<stats>(.*?)<\/stats>/gs, (match, text, offset, string) => {
+            string = string.replace(match, "")
+
+            stats.forEach(stat => {
+                string = string.replaceAll(` ${stat} `, ` ${stat} ${statistics[stat]}`)
+            })
+            return match + string + "<<==>>"
+        })
+
+        description = description.split("<<==>>")[0]
+
+        //stats
+        description = description.replace(/<stats>(.*?)<\/stats>/gs, (match, text) => {
+            let split = text.split("\n")
+            let statsText = []
+            for (let spl of split) {
+                let subText = ""
+
+                let sp = spl.split(" ")
+                sp = sp.slice(1, sp.length)
+                let text = sp.join(" ")
+                if (statistics[text]) {
+                    subText += statistics[text] + " "
+                }
+                subText += spl
+                statsText.push(subText)
+            }
+
+            return statsText.join("\n")
+        })
+
+        //bold
+
+        let regexes = [
+            /<attention>(.*?)<\/attention>/gs,
+            /<ornnBonus>(.*?)<\/ornnBonus>/gs,
+            /<active>(.*?)<\/active>/gs,
+            /<passive>(.*?)<\/passive>/gs,
+            /<rarityMythic>(.*?)<\/rarityMythic>/gs,
+            /<rarityLegendary>(.*?)<\/rarityLegendary>/gs,
+            /<keywordMajor>(.*?)<\/keywordMajor>/gs,
+            /<keywordStealth>(.*?)<\/keywordStealth>/gs,
+            /<scaleHealth>(.*?)<\/scaleHealth>/gs,
+            /<scaleMana>(.*?)<\/scaleMana>/gs,
+            /<scaleArmor>(.*?)<\/scaleArmor>/gs,
+            /<scaleMR>(.*?)<\/scaleMR>/gs,
+            /<scaleAP>(.*?)<\/scaleAP>/gs,
+            /<scaleAD>(.*?)<\/scaleAD>/gs,
+            /<physicalDamage>(.*?)<\/physicalDamage>/gs,
+            /<magicalDamage>(.*?)<\/magicalDamage>/gs,
+            /<shield>(.*?)<\/shield>/gs,
+
+            /<status>(.*?)<\/status>/gs,
+            /<trueDamage>(.*?)<\/trueDamage>/gs,
+            /<scaleLevel>(.*?)<\/scaleLevel>/gs,
+        ]
+
+        let func = function (match, text) {
+            return `**${text}**`
+        }
+
+        for (let regex of regexes) {
+            description = description.replace(regex, func)
+        }
+
+        //italic
+
+        regexes = [
+            /<rules>(.*?)<\/rules>/gs,
+        ]
+
+        func = function (match, text) {
+            return `*${text}*`
+        }
+
+        for (let regex of regexes) {
+            description = description.replace(regex, func)
+        }
+
+        return {
+            name: name,
+            description: description,
+            to: to,
+            from: from,
+            price: price,
+            sell: sell,
+            fileName: fileName
+        }
+    }
+
 }
