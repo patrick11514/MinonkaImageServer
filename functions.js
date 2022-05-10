@@ -138,6 +138,7 @@ module.exports = {
         let name = item.name
         let price = item.gold.total
         let sell = item.gold.sell
+        let categories = item.tags
 
         let emotes = require("./../assets/emojis.json")
 
@@ -157,7 +158,7 @@ module.exports = {
             .replaceAll("<br>", "\n")
             .replaceAll("<mainText>", "")
             .replaceAll("</mainText>", "")
-            .replaceAll("<li>", "  <:li:973387468332220456> ")
+            .replaceAll("<li>", "\n  <:li:973387468332220456> ")
 
         //replace words with emojis
         description = description.replace(/<stats>(.*?)<\/stats>/gs, (match, text, offset, string) => {
@@ -211,9 +212,9 @@ module.exports = {
             /<physicalDamage>(.*?)<\/physicalDamage>/gs,
             /<magicalDamage>(.*?)<\/magicalDamage>/gs,
             /<shield>(.*?)<\/shield>/gs,
-
             /<status>(.*?)<\/status>/gs,
             /<trueDamage>(.*?)<\/trueDamage>/gs,
+            /<truedamage>(.*?)<\/truedamage>/gs,
             /<scaleLevel>(.*?)<\/scaleLevel>/gs,
         ]
 
@@ -246,6 +247,7 @@ module.exports = {
             from: from,
             price: price,
             sell: sell,
+            categories: categories,
             fileName: fileName
         }
     }
