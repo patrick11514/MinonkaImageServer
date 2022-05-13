@@ -98,6 +98,7 @@ const logger = require('./logger.js')
         let champions = json.data
         let keys = Object.keys(champions)
         let count = 0
+        let count2 = 0
         for (let i = 0; i < keys.length; i++) {
             let champion = champions[keys[i]]
             let name = champion.id
@@ -106,6 +107,7 @@ const logger = require('./logger.js')
                 let request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion/${name}.json`)
                 let json = await request.json()
                 fs.writeFileSync(`./champions_data/${name}.json`, JSON.stringify(json))
+                count++
             }
             app.champions[champion.key] = name
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
@@ -121,7 +123,7 @@ const logger = require('./logger.js')
                 count++
             }
         }
-        logger.log(`Downloaded ${count} images`)
+        logger.log(`Downloaded ${count} images and downloaded ${count2} data files.`)
 
         //download item images and save them to global scope
         json = require('./items.json')
@@ -222,6 +224,30 @@ app.post('/restart', async (req, res) => {
 
 app.get('/champions', (req, res) => {
     res.send(app.champions)
+})
+
+app.get("/champion/:id(\d+)", (req, res) => {
+    let id = req.params.id
+    if (!app.champions[id]) {
+        return res.send({
+            error: 'Champion not found',
+        })
+    }
+
+    res.send(JSON.parse(fs.readFileSync(`./champions_data/${app.champions[id]}.json`)))
+})
+
+app.get("/champion/:name", (req, res) => {
+    let name = req.params.name.toLowerCase()
+    name = name.charAt(0).toUpperCase() + name.slice(1)
+
+    if (!fs.existsSync(`./champions_data/${name}.json`)) {
+        return res.send({
+            error: 'Champion not found',
+        })
+    }
+
+    res.send(JSON.parse(fs.readFileSync(`./champions_data/${name}.json`)))
 })
 
 app.get('/items', (req, res) => {
