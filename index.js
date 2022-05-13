@@ -96,6 +96,7 @@ const logger = require('./logger.js')
         logger.log('Downloading champion images')
         app.champions = {}
         let champions = json.data
+        let skins = []
         let keys = Object.keys(champions)
         let count = 0
         let count2 = 0
@@ -109,6 +110,20 @@ const logger = require('./logger.js')
                 fs.writeFileSync(`./champions_data/${name}.json`, JSON.stringify(json))
                 count++
             }
+
+            let champInfo = JSON.parse(fs.readFileSync(`./champions_data/${name}.json`))
+            let champSkins = champInfo.data[Object.keys(champInfo.data)[0]].skins
+
+            for (let j = 0; j < champSkins.length; j++) {
+                if (j == 0) continue
+                let skin = champSkins[j]
+                skins.push({
+                    champ: name,
+                    name: skin.name,
+                    id: skin.num,
+                })
+            }
+
             app.champions[champion.key] = name
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
             let file = `./champions/${name}.png`
@@ -124,6 +139,8 @@ const logger = require('./logger.js')
             }
         }
         logger.log(`Downloaded ${count} images and downloaded ${count2} data files.`)
+
+        app.skins = skins
 
         //download item images and save them to global scope
         json = require('./items.json')
@@ -234,20 +251,47 @@ app.get("/champion/:id(\d+)", (req, res) => {
         })
     }
 
-    res.send(JSON.parse(fs.readFileSync(`./champions_data/${app.champions[id]}.json`)))
+    let json = JSON.parse(fs.readFileSync(`./champions_data/${app.champions[id]}.json`))
+
+    res.send(json.data[Object.keys(json.data)[0]])
 })
 
 app.get("/champion/:name", (req, res) => {
     let name = req.params.name.toLowerCase()
-    name = name.charAt(0).toUpperCase() + name.slice(1)
 
-    if (!fs.existsSync(`./champions_data/${name}.json`)) {
+    if (name == "wukong")
+        name = "monkeyking"
+
+    let folder = "./champions_data"
+
+    let files = fs.readdirSync(folder)
+
+    let file = files.find((file) => file.toLowerCase().includes(name))
+
+    if (!file) {
         return res.send({
             error: 'Champion not found',
         })
     }
 
-    res.send(JSON.parse(fs.readFileSync(`./champions_data/${name}.json`)))
+    let json = JSON.parse(fs.readFileSync(`./champions_data/${file}`))
+
+    res.send(json.data[Object.keys(json.data)[0]])
+})
+
+app.get("/skin/:name", (req, res) => {
+    let name = req.params.name.toLowerCase()
+
+    let skin = app.skins.find((data) => data.name.toLowerCase().includes(name))
+
+    if (!skin) {
+        return res.send({
+            error: 'Skin not found',
+        })
+    }
+
+    res.send(skin)
+
 })
 
 app.get('/items', (req, res) => {
