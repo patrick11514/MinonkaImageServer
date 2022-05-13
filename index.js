@@ -101,6 +101,12 @@ const logger = require('./logger.js')
         for (let i = 0; i < keys.length; i++) {
             let champion = champions[keys[i]]
             let name = champion.id
+            if (!fs.existsSync(`./champions_data/${name}.json`)) {
+                logger.log(`Downloading data file for champion ${name}`)
+                let request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion/${name}.json`)
+                let json = await request.json()
+                fs.writeFileSync(`./champions_data/${name}.json`, JSON.stringify(json))
+            }
             app.champions[champion.key] = name
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
             let file = `./champions/${name}.png`
