@@ -40,7 +40,7 @@ const logger = require('./logger.js')
             json = await request.json()
         }
 
-        fs.writeFileSync('./champions.json', JSON.stringify(json))
+        fs.writeFileSync('./assets/riotFiles/champions.json', JSON.stringify(json))
 
         //items
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/item.json`)
@@ -53,7 +53,7 @@ const logger = require('./logger.js')
             json = await request.json()
         }
 
-        fs.writeFileSync('./items.json', JSON.stringify(json))
+        fs.writeFileSync('./assets/riotFiles/items.json', JSON.stringify(json))
 
         //summoner spells
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/summoner.json`)
@@ -66,15 +66,15 @@ const logger = require('./logger.js')
             json = await request.json()
         }
 
-        fs.writeFileSync('./summoner.json', JSON.stringify(json))
+        fs.writeFileSync('./assets/riotFiles/summoner.json', JSON.stringify(json))
 
         //runes
         request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/runesReforged.json`)
         json = await request.json()
 
-        fs.writeFileSync('./runes.json', JSON.stringify(json))
+        fs.writeFileSync('./assets/riotFiles/runes.json', JSON.stringify(json))
 
-        fs.writeFileSync('./version', currentVersion)
+        fs.writeFileSync('./assets/riotFiles/version', currentVersion)
         logger.log('Ok')
 
         //resize icons
@@ -91,7 +91,7 @@ const logger = require('./logger.js')
         logger.log('Done.')
 
         //download champion images and save them to global scope
-        json = require('./champions.json')
+        json = require('./assets/riotFiles/champions.json')
 
         logger.log('Downloading champion images')
         app.champions = {}
@@ -103,15 +103,15 @@ const logger = require('./logger.js')
         for (let i = 0; i < keys.length; i++) {
             let champion = champions[keys[i]]
             let name = champion.id
-            if (!fs.existsSync(`./champions_data/${name}.json`)) {
+            if (!fs.existsSync(`./assets/riotFiles/championsData/${name}.json`)) {
                 logger.log(`Downloading data file for champion ${name}`)
                 let request = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/en_US/champion/${name}.json`)
                 let json = await request.json()
-                fs.writeFileSync(`./champions_data/${name}.json`, JSON.stringify(json))
+                fs.writeFileSync(`./assets/riotFiles/championsData/${name}.json`, JSON.stringify(json))
                 count++
             }
 
-            let champInfo = JSON.parse(fs.readFileSync(`./champions_data/${name}.json`))
+            let champInfo = JSON.parse(fs.readFileSync(`./assets/riotFiles/championsData/${name}.json`))
             let champSkins = champInfo.data[Object.keys(champInfo.data)[0]].skins
 
             for (let j = 0; j < champSkins.length; j++) {
@@ -126,7 +126,7 @@ const logger = require('./logger.js')
 
             app.champions[champion.key] = name
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/champion/${name}.png`
-            let file = `./champions/${name}.png`
+            let file = `./assets/riotFiles/champions/${name}.png`
             if (fs.existsSync(file)) {
                 continue
             }
@@ -143,7 +143,7 @@ const logger = require('./logger.js')
         app.skins = skins
 
         //download item images and save them to global scope
-        json = require('./items.json')
+        json = require('./assets/riotFiles/items.json')
 
         logger.log('Downloading item images')
         let items = json.data
@@ -167,7 +167,7 @@ const logger = require('./logger.js')
             app.items[id] = g.formatItem(item, name, id)
 
             let url = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/img/item/${id}.png`
-            let file = `./items/${name}.png`
+            let file = `./assets/riotFiles/items/${name}.png`
             if (fs.existsSync(file)) {
                 continue
             }
@@ -251,7 +251,7 @@ app.get("/champion/:id(\d+)", (req, res) => {
         })
     }
 
-    let json = JSON.parse(fs.readFileSync(`./champions_data/${app.champions[id]}.json`))
+    let json = JSON.parse(fs.readFileSync(`./assets/riotFiles/championsData/${app.champions[id]}.json`))
 
     res.send(json.data[Object.keys(json.data)[0]])
 })
@@ -262,7 +262,7 @@ app.get("/champion/:name", (req, res) => {
     if (name == "wukong")
         name = "monkeyking"
 
-    let folder = "./champions_data"
+    let folder = "./assets/riotFiles/championsData"
 
     let files = fs.readdirSync(folder)
 
@@ -274,7 +274,7 @@ app.get("/champion/:name", (req, res) => {
         })
     }
 
-    let json = JSON.parse(fs.readFileSync(`./champions_data/${file}`))
+    let json = JSON.parse(fs.readFileSync(`./assets/riotFiles/championsData/${file}`))
 
     res.send(json.data[Object.keys(json.data)[0]])
 })
