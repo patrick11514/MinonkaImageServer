@@ -72,7 +72,7 @@ module.exports = {
         let file = `./icons_cache/${iconId}.png`
         let original = `./icons_cache/${iconId}_original.png`
         if (!fs.existsSync(file)) {
-            let ver = fs.readFileSync('./version', 'utf8')
+            let ver = fs.readFileSync('./assets/riotFiles/version', 'utf8')
             let url = `https://ddragon.leagueoflegends.com/cdn/${ver}/img/profileicon/${iconId}.png`
             let response = await fetch(url)
 
