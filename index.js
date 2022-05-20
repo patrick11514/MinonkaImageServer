@@ -186,6 +186,7 @@ const logger = require('./logger.js')
         app.loading = false
     })()
 
+// =========== Main ===========
 app.get('/', (req, res) => {
     res.send(`Riot API v${package.version}`)
 })
@@ -195,6 +196,25 @@ app.get('/status', (req, res) => {
         status: app.loading,
     })
 })
+
+app.post('/restart', async (req, res) => {
+    let params = req.body
+    if (params.token != process.env.restartToken) {
+        return res.send({
+            error: 'Invalid token',
+        })
+    }
+    res.send({
+        restarting: true,
+    })
+    logger.log('Restarting...')
+    app.loading = true
+    setTimeout(function () {
+        process.exit(0)
+    }, 200)
+})
+
+// =========== Summoner ===========
 
 app.post('/summonerProfile', async (req, res) => {
     let params = req.body
@@ -222,22 +242,19 @@ app.post('/summonerProfile', async (req, res) => {
     }
 })
 
-app.post('/restart', async (req, res) => {
-    let params = req.body
-    if (params.token != process.env.restartToken) {
-        return res.send({
-            error: 'Invalid token',
+app.get("/summonerFile/:file", (req, res) => {
+    let file = req.params.file
+
+    if (!fs.existsSync(`./temp/${file}`)) {
+        return res.status(404).send({
+            error: 'File not found.',
         })
     }
-    res.send({
-        restarting: true,
-    })
-    logger.log('Restarting...')
-    app.loading = true
-    setTimeout(function () {
-        process.exit(0)
-    }, 200)
+    res.sendFile(`${__dirname}/temp/${file}`)
 })
+
+// ======== Champion =========
+
 
 app.get('/champions', (req, res) => {
     res.send(app.champions)
@@ -279,6 +296,8 @@ app.get("/champion/:name", (req, res) => {
     res.send(json.data[Object.keys(json.data)[0]])
 })
 
+// =========== Skins ===========
+
 app.get("/skin/:name", (req, res) => {
     let name = req.params.name.toLowerCase()
 
@@ -294,8 +313,28 @@ app.get("/skin/:name", (req, res) => {
 
 })
 
+// =========== Items ===========
+
 app.get('/items', (req, res) => {
     res.send(app.items)
 })
+
+app.get("/item/:item", (req, res) => {
+    let item = req.params.item
+    if (!fs.existsSync(`./assets/riotFiles/items/${item}.png`)) {
+        return res.status(404).send({
+            error: 'Item file not found',
+        })
+    }
+
+    res.sendFile(`${__dirname}/assets/riotFiles/items/${item}.png`)
+})
+
+app.get("/recipe/:item", (req, res) => {
+    let item = req.params.item
+
+})
+
+// ============================
 
 app.listen(port, () => logger.log(`Riot API v${package.version} listening on port ${port}!`))
