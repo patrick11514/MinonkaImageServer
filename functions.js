@@ -91,7 +91,7 @@ module.exports = {
             if (_.isEqual(data.params, params)) {
                 if (fs.existsSync(data.filename)) {
                     logger.log(`Using generated image for ${name}@${region} in ${data.filename}`)
-                    return data.filename
+                    return data.filename.split("/").pop()
                 }
             }
         }
@@ -118,7 +118,7 @@ module.exports = {
         logger.log(`File written in ${new Date() - start}ms`)
         logger.log(`Generated profile for ${name}#${region} to ${temp_name} in ${diff}ms`)
 
-        return temp_name
+        return temp_name.split("/").pop()
     },
 
     generateRandomString: function (length) {
@@ -311,7 +311,8 @@ module.exports = {
             categories: categories,
             depth: depth,
             requiredAlly: requiredAlly,
-            fileName: fileName
+            fileName: fileName,
+            recipe: null
         }
     }
 
