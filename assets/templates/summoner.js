@@ -95,7 +95,7 @@ module.exports = {
             y
         )
 
-        buffer = await this.composite(buffer, await this.addText(`${ranked.lp}LP`, 28, 348, '#FFF', false), 528, y)
+        buffer = await this.composite(buffer, await this.addText(`${ranked.lp}LP`, 28, 348, '#FFF', false), 568, y)
 
         buffer = await this.composite(buffer, await ig.getRankFile(ranked.tier), 700, y - 10)
 
